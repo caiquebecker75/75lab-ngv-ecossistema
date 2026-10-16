@@ -29,9 +29,22 @@ No original, imagens e fontes vinham embutidas em base64 dentro do `index.html` 
 | 8 | `planta` | Os 40 m², área por área |
 | 9 | `planta-baixa` | O desenho, sem intermediários |
 | 10 | `atmosfera` | A identidade NGV, construída em três dimensões |
-| 11 | `pecas` | A marca continua depois da feira |
-| 12 | `fecho` | fechamento |
-| 13 | `obrigado` | obrigado |
+| 11 | `pecas` | A marca continua depois da feira (camisetas vestidas) |
+| 12 | `kit` | as 10 peças do kit |
+| 13 | `fecho` | fechamento |
+| 14 | `obrigado` | obrigado |
+
+## Navegação
+
+Em tela de computador (a partir de 1080 px de largura) o deck passa slide a slide, como as outras apresentações da 75 LAB: o slide novo entra numa cortina lateral e o anterior cresce e desfoca.
+
+- setas, Page Up/Down e espaço; Home e End vão para o primeiro e o último
+- roda do mouse ou trackpad: um slide por gesto
+- swipe em tela touch
+- pontos do trilho à esquerda e as setas no canto inferior direito
+- `#5` no fim do link abre direto no quinto slide
+
+Se a janela for baixa demais para um slide, ele encolhe por inteiro até caber. Abaixo de 1080 px (celular, tablet em pé) a página volta a rolar.
 
 ## Pré-visualizar
 

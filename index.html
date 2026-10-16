@@ -450,6 +450,7 @@ strong{color:var(--branco);font-weight:500}
 #planta-baixa{--brilho:rgba(142,40,180,.22); --bx:16%; --by:20%}
 #atmosfera   {--brilho:rgba(142,40,180,.30); --bx:18%; --by:80%}
 #pecas       {--brilho:rgba(225,11,27,.22);  --bx:84%; --by:16%}
+#kit         {--brilho:rgba(0,183,234,.20);  --bx:14%; --by:84%}
 #obrigado    {--brilho:rgba(192,238,78,.18); --bx:78%; --by:78%}
 
 /* o fecho esquenta: dois focos quentes em vez de um */
@@ -525,8 +526,9 @@ strong{color:var(--branco);font-weight:500}
 .trilho a:nth-of-type(9){--c:#4A6FFE}
 .trilho a:nth-of-type(10){--c:#2E92F2}
 .trilho a:nth-of-type(11){--c:#00B7EA}
-.trilho a:nth-of-type(12){--c:#43C3EC}
-.trilho a:nth-of-type(13){--c:#C0EE4E}
+.trilho a:nth-of-type(12){--c:#22BDEB}
+.trilho a:nth-of-type(13){--c:#43C3EC}
+.trilho a:nth-of-type(14){--c:#C0EE4E}
 .trilho a[data-ativo]{background:var(--c,#FF6700);box-shadow:0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent)}
 
 /* ═══════════ imagens ampliáveis ═══════════ */
@@ -779,10 +781,67 @@ strong{color:var(--branco);font-weight:500}
 .tresd-qr .qr{width:92px;height:92px;flex:none;border-radius:8px}
 .tresd-qr span{color:var(--nevoa);line-height:1.45}
 
+/* ═══════════ modo apresentação: um slide por tela ═══════════
+   Na largura em que o trilho aparece o deck para de rolar e passa slide a
+   slide, como as outras apresentações da 75 LAB: o novo entra numa cortina
+   lateral e o que sai cresce e desfoca. Teclado, roda do mouse (um slide
+   por gesto), swipe, trilho e setas. Abaixo disso a rolagem continua, que
+   é como o deck se lê no celular. */
+.controles{display:none}
+html.deck{scroll-behavior:auto}
+html.deck body{height:100svh;overflow:hidden}
+html.deck .slide{
+  position:fixed;top:0;right:0;bottom:0;left:var(--rail);
+  min-height:0;border-bottom:none;background-color:var(--preto);
+  justify-content:safe center;opacity:0;visibility:hidden;
+}
+html.deck .fundo-navy{background-color:var(--navy)}
+html.deck .slide.atual,html.deck .slide.saindo{opacity:1;visibility:visible}
+html.deck .slide.atual{z-index:2}
+html.deck .slide.saindo{z-index:1;transform:scale(1.045);filter:blur(5px);transition:transform .9s ease,filter .9s ease}
+html.deck .slide.atual.vai{animation:cortina-vai 1s cubic-bezier(.7,0,.2,1) both}
+html.deck .slide.atual.volta{animation:cortina-volta 1s cubic-bezier(.7,0,.2,1) both}
+@keyframes cortina-vai{from{clip-path:inset(0 0 0 100%)}to{clip-path:inset(0 0 0 0)}}
+@keyframes cortina-volta{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+html.deck .progresso i{transition:width .8s cubic-bezier(.7,0,.2,1)}
+
+/* cada slide cabe numa tela: a foto do stand ocupa a altura que sobrar,
+   as galerias abrem em uma fila e o kit em duas */
+html.deck .hero .chapa{flex:1 1 0;min-height:0}
+html.deck .hero .chapa .moldura{height:100%}
+html.deck .hero .chapa img{height:100%;max-height:none}
+html.deck .atos .chapa img{aspect-ratio:16/9}
+html.deck #dentro .galeria{grid-template-columns:repeat(4,minmax(0,1fr))}
+html.deck #kit .pecas{grid-template-columns:repeat(5,minmax(0,1fr))}
+
+html.deck .controles{
+  display:flex;gap:10px;position:fixed;z-index:55;
+  right:clamp(18px,2.2vw,32px);bottom:clamp(16px,2.4vh,28px);
+}
+.controles button{
+  appearance:none;width:42px;height:42px;border-radius:50%;padding:0;cursor:pointer;
+  display:grid;place-items:center;color:var(--branco);
+  border:1px solid var(--linha-forte);background:rgba(40,38,41,.55);backdrop-filter:blur(6px);
+  transition:background .25s ease, border-color .25s ease, opacity .25s ease;
+}
+.controles button:hover{background:var(--superficie-2);border-color:var(--nevoa)}
+.controles button:focus-visible{outline:2px solid var(--ciano);outline-offset:3px}
+.controles button:disabled{opacity:.28;cursor:default;background:transparent;border-color:var(--linha)}
+.controles svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+@media (prefers-reduced-motion:reduce){
+  html.deck .slide.saindo{transform:none;filter:none;transition:none}
+  html.deck .slide.atual.vai,html.deck .slide.atual.volta{animation:none}
+  html.deck .progresso i{transition:none}
+}
+
 </style>
 </head>
 <body>
-<script>document.documentElement.classList.add('js');</script>
+<script>
+document.documentElement.classList.add('js');
+if(matchMedia('(min-width:1080px)').matches) document.documentElement.classList.add('deck');
+</script>
 
 <div class="progresso"><i id="barra"></i></div>
 
@@ -799,10 +858,16 @@ strong{color:var(--branco);font-weight:500}
   <a href="#planta-baixa" data-nome="Planta baixa"></a>
   <a href="#atmosfera" data-nome="Luz e cor"></a>
   <a href="#pecas"     data-nome="As peças"></a>
+  <a href="#kit"       data-nome="O kit"></a>
   <a href="#fecho"     data-nome="O que fica"></a>
   <a href="#obrigado"  data-nome="Obrigado"></a>
-  <span class="pag" id="contador">01/13</span>
+  <span class="pag" id="contador">01/14</span>
 </nav>
+
+<div class="controles">
+  <button type="button" class="ctl-ant" aria-label="Slide anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button type="button" class="ctl-prox" aria-label="Próximo slide"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+</div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -1089,6 +1154,13 @@ strong{color:var(--branco);font-weight:500}
       <figure class="peca larga rev d2"><div class="moldura"><img class="ampliar" src="assets/img/13-camiseta-ngv-branca-vestida.jpg" alt="Camiseta NGV branca vestida" loading="lazy" decoding="async" width="1000" height="747"><span class="lupa-dica" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5M11 8v6M8 11h6"/></svg></span></div><figcaption>Camiseta · versão clara</figcaption></figure>
       <figure class="peca larga rev d3"><div class="moldura"><img class="ampliar" src="assets/img/14-camiseta-ngv-preta-vestida.jpg" alt="Camiseta NGV preta vestida" loading="lazy" decoding="async" width="1000" height="747"><span class="lupa-dica" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5M11 8v6M8 11h6"/></svg></span></div><figcaption>Camiseta · versão escura</figcaption></figure>
     </div>
+  </div>
+</section>
+
+<!-- ═══════ 10 · AS PEÇAS — O KIT ═══════ -->
+<section class="slide" id="kit">
+  <div class="interno">
+    <p class="olho rev">10 · As peças</p>
 
     <div class="pecas">
       <figure class="peca rev d2"><div class="moldura"><img class="ampliar" src="assets/img/15-camiseta-clara-frente-e-costas.webp" alt="Camiseta clara, frente e costas" loading="lazy" decoding="async" width="700" height="525"><span class="lupa-dica" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5M11 8v6M8 11h6"/></svg></span></div><figcaption>Camiseta clara</figcaption></figure>
@@ -1187,107 +1259,142 @@ strong{color:var(--branco);font-weight:500}
 
 <script>
 (function(){
+  var raiz    = document.documentElement;
   var secoes  = [].slice.call(document.querySelectorAll('.slide'));
   var pontos  = [].slice.call(document.querySelectorAll('.trilho a'));
   var barra   = document.getElementById('barra');
   var contador= document.getElementById('contador');
+  var btAnt   = document.querySelector('.ctl-ant');
+  var btProx  = document.querySelector('.ctl-prox');
   var reduzido= matchMedia('(prefers-reduced-motion: reduce)').matches;
   var temIO   = 'IntersectionObserver' in window;
   var reveladores = [].slice.call(document.querySelectorAll('.rev'));
+  var N = secoes.length;
+
+  /* ── modo: apresentação (um slide por tela) ou rolagem ─────────────
+     Mesmo corte do trilho. A classe já vem do script do topo do <body>,
+     para a página não piscar no layout de rolagem antes de virar deck. */
+  var telaLarga = matchMedia('(min-width:1080px)');
+  var deck = telaLarga.matches;
+  raiz.classList.toggle('deck', deck);
+  var atual = -1;
+
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function cada(lista, fn){ [].forEach.call(lista, fn); }
 
   /* ── a forma curva se desenha da ponta grossa para a fina ──────────
      O observer precisa olhar para um elemento HTML: um <path> de SVG
-     não tem caixa de layout e o IntersectionObserver nunca dispara nele. */
-  function desenhar(alvo, container, segundos, aoTerminar){
+     não tem caixa de layout e o IntersectionObserver nunca dispara nele.
+     No deck quem dispara é a entrada do slide, e o traço refaz a cada volta. */
+  var tracos = [];
+  function desenhar(alvo, container, segundos, aoTerminar, aoZerar){
     var el = document.getElementById(alvo);
-    var caixa = container ? document.querySelector(container) : null;
     if(!el) return;
-    if(reduzido){ if(aoTerminar) aoTerminar(); return; }
+    var t = {el: el, caixa: container ? document.querySelector(container) : null,
+             s: segundos, fim: aoTerminar, zera: aoZerar, feito: false};
+    tracos.push(t);
+    if(reduzido){ t.feito = true; if(aoTerminar) aoTerminar(); return; }
     el.style.clipPath = 'inset(0 100% 0 0)';
-    var animar = function(){
-      /* força o reflow para o estado inicial ser commitado antes da transição.
-         Um requestAnimationFrame aqui travaria em documento não renderizado. */
-      void el.getBoundingClientRect();
-      el.style.transition = 'clip-path ' + segundos + 's cubic-bezier(.22,.7,.28,1)';
-      el.style.clipPath = 'inset(0 0 0 0)';
-      if(aoTerminar) aoTerminar();
-    };
-    if(!caixa){ setTimeout(animar, 220); return; }
-    var feito = false;
-    var uma = function(){ if(feito) return; feito = true; animar(); };
-    pendentes.push({el: caixa, roda: uma});
+    if(deck) return;
+    if(!t.caixa){ setTimeout(function(){ tracar(t); }, 220); return; }
     if(temIO){
       new IntersectionObserver(function(es, o){
-        es.forEach(function(e){ if(e.isIntersecting){ uma(); o.disconnect(); } });
-      }, {threshold:.25}).observe(caixa);
+        es.forEach(function(e){ if(e.isIntersecting && !deck){ tracar(t); o.disconnect(); } });
+      }, {threshold:.25}).observe(t.caixa);
     }
   }
+  function tracar(t){
+    if(t.feito) return;
+    t.feito = true;
+    /* força o reflow para o estado inicial ser commitado antes da transição.
+       Um requestAnimationFrame aqui travaria em documento não renderizado. */
+    void t.el.getBoundingClientRect();
+    t.el.style.transition = 'clip-path ' + t.s + 's cubic-bezier(.22,.7,.28,1)';
+    t.el.style.clipPath = 'inset(0 0 0 0)';
+    if(t.fim) t.fim();
+  }
+  function zerarTraco(t){
+    if(reduzido) return;
+    t.el.style.transition = 'none';
+    t.el.style.clipPath = 'inset(0 100% 0 0)';
+    t.feito = false;
+    if(t.zera) t.zera();
+  }
+  function tracosDe(s){
+    return tracos.filter(function(t){ return s.contains(t.el) || (t.caixa && s.contains(t.caixa)); });
+  }
 
-  /* Rede de segurança: se o IntersectionObserver não rodar — aba em segundo
-     plano, renderização suspensa, navegador antigo — a geometria do scroll
-     assume e nada fica preso invisível. */
-  var pendentes = [];
+  var eco = document.querySelector('.eco');
+  desenhar('fita-capa', null, 1.6);
+  desenhar('fita-capa2', null, 1.9);
+  /* os seis pontos acendem conforme a linha passa por eles (delay no --d de cada um) */
+  desenhar('fita-eco', '.eco', 1.8,
+    function(){ if(eco) eco.classList.add('ligado'); },
+    function(){ if(eco) eco.classList.remove('ligado'); });
+
+  /* Rede de segurança da rolagem: se o IntersectionObserver não rodar — aba
+     em segundo plano, renderização suspensa, navegador antigo — a geometria
+     do scroll assume e nada fica preso invisível. */
   function naTela(el, folga){
     var r = el.getBoundingClientRect();
     return r.top < innerHeight - (folga || 0) && r.bottom > 0;
   }
   function conferirPendentes(){
-    for(var i = pendentes.length - 1; i >= 0; i--){
-      if(naTela(pendentes[i].el, 60)){ pendentes[i].roda(); pendentes.splice(i, 1); }
-    }
+    if(deck) return;
+    tracos.forEach(function(t){ if(!t.feito && t.caixa && naTela(t.caixa, 60)) tracar(t); });
     reveladores.forEach(function(el){
       if(!el.classList.contains('dentro') && naTela(el, 40)) el.classList.add('dentro');
     });
     secoes.forEach(function(s){ s.classList.toggle('ativa', naTela(s, 0)); });
   }
 
-  desenhar('fita-capa', null, 1.6);
-  desenhar('fita-capa2', null, 1.9);
-  /* os seis pontos acendem conforme a linha passa por eles (delay no --d de cada um) */
-  desenhar('fita-eco', '.eco', 1.8, function(){
-    var eco = document.querySelector('.eco');
-    if(eco) eco.classList.add('ligado');
-  });
-  if(reduzido){
-    var eco = document.querySelector('.eco');
-    if(eco) eco.classList.add('ligado');
-  }
-
   /* ── revelação por scroll ────────────────────────────────────────── */
   if(!temIO){
-    reveladores.forEach(function(el){ el.classList.add('dentro'); });
-    secoes.forEach(function(s){ s.classList.add('ativa'); });
+    if(!deck){
+      reveladores.forEach(function(el){ el.classList.add('dentro'); });
+      secoes.forEach(function(s){ s.classList.add('ativa'); });
+    }
   } else {
     var obs = new IntersectionObserver(function(es){
+      if(deck) return;
       es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('dentro'); obs.unobserve(e.target); } });
     }, {threshold:.12, rootMargin:'0px 0px -8% 0px'});
     reveladores.forEach(function(el){ obs.observe(el); });
     setTimeout(function(){
+      if(deck) return;
       reveladores.forEach(function(el){ if(el.getBoundingClientRect().top < 0) el.classList.add('dentro'); });
     }, 400);
 
     /* o brilho de cor de cada seção acende quando ela entra e apaga ao sair */
     var obsSecao = new IntersectionObserver(function(es){
+      if(deck) return;
       es.forEach(function(e){ e.target.classList.toggle('ativa', e.isIntersecting); });
     }, {threshold:.18});
     secoes.forEach(function(s){ obsSecao.observe(s); });
   }
 
   /* ── progresso e seção corrente ──────────────────────────────────── */
-  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function marcar(i){
+    pontos.forEach(function(p,k){ k===i ? p.setAttribute('data-ativo','') : p.removeAttribute('data-ativo'); });
+    contador.textContent = pad(i+1) + '/' + pad(N);
+  }
+  function indiceRolagem(){
+    var meio = scrollY + innerHeight*0.4, i = 0;
+    secoes.forEach(function(s,k){ if(s.offsetTop <= meio) i = k; });
+    return i;
+  }
   function atualizar(){
+    if(deck) return;
     var rolavel = document.documentElement.scrollHeight - innerHeight;
     barra.style.width = (rolavel > 0 ? (scrollY/rolavel)*100 : 0) + '%';
-    var meio = scrollY + innerHeight*0.4, atual = 0;
-    secoes.forEach(function(s,i){ if(s.offsetTop <= meio) atual = i; });
-    pontos.forEach(function(p,i){ i===atual ? p.setAttribute('data-ativo','') : p.removeAttribute('data-ativo'); });
-    contador.textContent = pad(atual+1) + '/' + pad(secoes.length);
+    marcar(indiceRolagem());
   }
   /* A conferência roda direto no evento (barata, e independe de rAF).
      A barra de progresso usa rAF, com destravamento por tempo: em documento
      não renderizado o rAF não roda e a flag ficaria presa para sempre. */
   var agendado = false, ultimaConferencia = 0;
   addEventListener('scroll', function(){
+    if(deck) return;
     var t = performance.now();
     if(t - ultimaConferencia > 90){ ultimaConferencia = t; conferirPendentes(); }
     if(agendado) return;
@@ -1295,28 +1402,142 @@ strong{color:var(--branco);font-weight:500}
     requestAnimationFrame(function(){ atualizar(); agendado = false; });
     setTimeout(function(){ agendado = false; }, 400);
   }, {passive:true});
-  addEventListener('resize', atualizar);
-  atualizar();
-  conferirPendentes();
-  addEventListener('load', conferirPendentes);
 
-  /* ── navegação por teclado ───────────────────────────────────────── */
+  /* ── rolagem: o teclado anda dentro da seção antes de pular ──────── */
   function irPara(dir){
-    var meio = scrollY + innerHeight*0.4, atual = 0;
-    secoes.forEach(function(s,i){ if(s.offsetTop <= meio) atual = i; });
-    var s = secoes[atual], topo = s.offsetTop, fundo = topo + s.offsetHeight;
+    var atualR = indiceRolagem();
+    var s = secoes[atualR], topo = s.offsetTop, fundo = topo + s.offsetHeight;
     var passo = innerHeight * 0.86, folga = 24, destino;
     if(dir > 0 && scrollY + innerHeight < fundo - folga){
       destino = Math.min(scrollY + passo, fundo - innerHeight);
     } else if(dir < 0 && scrollY > topo + folga){
       destino = Math.max(scrollY - passo, topo);
     } else {
-      var alvo = secoes[Math.min(secoes.length-1, Math.max(0, atual+dir))];
+      var alvo = secoes[Math.min(secoes.length-1, Math.max(0, atualR+dir))];
       if(!alvo) return;
       destino = alvo.offsetTop;
     }
     scrollTo({top: destino, behavior: reduzido ? 'auto' : 'smooth'});
   }
+
+  /* ── deck: entrada e saída de cada slide ─────────────────────────── */
+  function entrar(s){
+    s.classList.add('ativa');
+    cada(s.querySelectorAll('.rev'), function(el){ el.classList.add('dentro'); });
+    tracosDe(s).forEach(tracar);
+    if(planta && s.contains(planta)) iniciarPasseio();
+  }
+  /* roda quando o slide já saiu de cena: tudo volta ao ponto de partida
+     para a próxima entrada se apresentar de novo */
+  function sair(s){
+    s.classList.remove('ativa');
+    cada(s.querySelectorAll('.rev'), function(el){ el.classList.remove('dentro'); });
+    tracosDe(s).forEach(zerarTraco);
+    if(planta && s.contains(planta)) pararPasseio();
+  }
+
+  function ir(n, forcar){
+    n = Math.max(0, Math.min(N-1, n));
+    if(n === atual && !forcar) return;
+    var ant = atual;
+    atual = n;
+    if(ant >= 0 && ant !== n){
+      var velho = secoes[ant];
+      velho.classList.add('saindo');
+      setTimeout(function(){
+        if(secoes.indexOf(velho) === atual) return;
+        velho.classList.remove('atual','vai','volta','saindo');
+        sair(velho);
+      }, reduzido ? 0 : 1000);
+    }
+    var s = secoes[n];
+    s.classList.remove('saindo','vai','volta','atual');
+    void s.offsetWidth;
+    s.classList.add('atual');
+    if(ant >= 0 && ant !== n && !reduzido) s.classList.add(n > ant ? 'vai' : 'volta');
+    setTimeout(function(){ if(deck && secoes[atual] === s) entrar(s); }, ant >= 0 && !reduzido ? 180 : 0);
+    barra.style.width = ((n+1)/N*100) + '%';
+    marcar(n);
+    if(btAnt)  btAnt.disabled  = n === 0;
+    if(btProx) btProx.disabled = n === N-1;
+    if(history.replaceState) history.replaceState(null, '', '#' + (n+1));
+  }
+
+  /* #5 abre no quinto slide (como nos outros decks); #planta abre na seção */
+  function indiceDoHash(){
+    var h = decodeURIComponent(location.hash.slice(1));
+    if(!h) return 0;
+    if(/^\d+$/.test(h)) return Math.max(0, Math.min(N-1, parseInt(h,10) - 1));
+    var el = document.getElementById(h);
+    var s = el && el.closest('.slide');
+    return s ? secoes.indexOf(s) : 0;
+  }
+  addEventListener('hashchange', function(){ if(deck) ir(indiceDoHash()); });
+
+  /* Slide que passe da altura da tela (notebook baixo, janela estreita)
+     encolhe por inteiro até caber, em vez de cortar o rodapé. A largura vai
+     fixa em px junto com o zoom: largura em % seria recalculada no espaço
+     ampliado e as fotos não encolheriam, só o texto. */
+  function ajustar(){
+    secoes.forEach(function(s){
+      var filhos = [].slice.call(s.children).filter(function(c){
+        var p = getComputedStyle(c).position;
+        return p !== 'absolute' && p !== 'fixed';
+      });
+      filhos.forEach(function(c){ c.style.zoom = ''; c.style.width = ''; });
+      if(!deck || !filhos.length) return;
+      var cs = getComputedStyle(s);
+      var util = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      var primeiro = filhos[0], ultimo = filhos[filhos.length-1];
+      var conteudo = ultimo.offsetTop + ultimo.offsetHeight + parseFloat(getComputedStyle(ultimo).marginBottom)
+                   - (primeiro.offsetTop - parseFloat(getComputedStyle(primeiro).marginTop));
+      if(conteudo > util + 1){
+        var f = Math.max(.62, util / conteudo);
+        filhos.forEach(function(c){
+          c.style.width = c.offsetWidth + 'px';
+          c.style.zoom = f.toFixed(3);
+        });
+      }
+    });
+  }
+  var esperaAjuste;
+  addEventListener('resize', function(){
+    atualizar();
+    clearTimeout(esperaAjuste);
+    esperaAjuste = setTimeout(ajustar, 120);
+  });
+
+  function aplicarModo(){
+    var agora = telaLarga.matches;
+    if(agora === deck) return;
+    if(agora){
+      var i = indiceRolagem();
+      deck = true;
+      raiz.classList.add('deck');
+      secoes.forEach(function(s){
+        s.classList.remove('atual','saindo','vai','volta','ativa');
+        cada(s.querySelectorAll('.rev'), function(el){ el.classList.remove('dentro'); });
+      });
+      tracos.forEach(zerarTraco);
+      pararPasseio();
+      atual = -1;
+      ajustar();
+      ir(i, true);
+    } else {
+      var alvo = secoes[Math.max(0, atual)];
+      deck = false;
+      raiz.classList.remove('deck');
+      secoes.forEach(function(s){ s.classList.remove('atual','saindo','vai','volta'); });
+      ajustar();
+      reveladores.forEach(function(el){ el.classList.add('dentro'); });
+      tracos.forEach(tracar);
+      scrollTo({top: alvo.offsetTop, behavior: 'instant'});
+      atualizar();
+      conferirPendentes();
+    }
+  }
+  if(telaLarga.addEventListener) telaLarga.addEventListener('change', aplicarModo);
+  else if(telaLarga.addListener) telaLarga.addListener(aplicarModo);
 
   /* ── lupa: qualquer imagem do projeto abre em tela cheia ─────────── */
   var lupa      = document.getElementById('lupa');
@@ -1325,6 +1546,7 @@ strong{color:var(--branco);font-weight:500}
   var lupaConta = document.getElementById('lupa-conta');
   var galeria   = [].slice.call(document.querySelectorAll('.ampliar'));
   var atualLupa = -1;
+  function lupaAberta(){ return !!(lupa && lupa.classList.contains('aberta')); }
 
   galeria.forEach(function(img, i){
     img.setAttribute('tabindex', '0');
@@ -1332,7 +1554,7 @@ strong{color:var(--branco);font-weight:500}
     img.setAttribute('aria-label', 'Ampliar: ' + (img.alt || 'imagem'));
     img.addEventListener('click', function(){ abrir(i); });
     img.addEventListener('keydown', function(e){
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); abrir(i); }
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); e.stopPropagation(); abrir(i); }
     });
   });
 
@@ -1354,7 +1576,7 @@ strong{color:var(--branco);font-weight:500}
     lupa.classList.remove('aberta');
     lupa.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
-    if(atualLupa >= 0 && galeria[atualLupa]) galeria[atualLupa].focus();
+    if(atualLupa >= 0 && galeria[atualLupa]) galeria[atualLupa].focus({preventScroll: deck});
     atualLupa = -1;
   }
   if(lupa){
@@ -1385,51 +1607,51 @@ strong{color:var(--branco);font-weight:500}
 
   /* ── planta interativa: conduz o olhar de área em área ───────────── */
   var planta = document.querySelector('.planta-viva');
+  var passeio = null, tocado = false, marcas = [], itens = [];
+  function mostrar(z){
+    planta.dataset.zona = z;
+    planta.classList.add('guiando');
+    marcas.forEach(function(m){
+      var on = m.dataset.z === String(z);
+      m.classList.toggle('ativa', on);
+      if(on){
+        var cs = getComputedStyle(m);
+        /* o holofote mira o centro da área; o número fica ao lado do rótulo impresso */
+        planta.style.setProperty('--fx', (cs.getPropertyValue('--ax') || cs.getPropertyValue('--x')).trim());
+        planta.style.setProperty('--fy', (cs.getPropertyValue('--ay') || cs.getPropertyValue('--y')).trim());
+      }
+    });
+    itens.forEach(function(i){
+      var on = i.dataset.z === String(z);
+      i.classList.toggle('ativa', on);
+      i.setAttribute('aria-current', on ? 'true' : 'false');
+    });
+  }
+  /* enquanto ninguém interage, o stand se apresenta sozinho */
+  function iniciarPasseio(){
+    if(!planta || reduzido || tocado || passeio) return;
+    mostrar(1);
+    var z = 1;
+    passeio = setInterval(function(){ z = z % marcas.length + 1; mostrar(z); }, 3200);
+  }
+  function pararPasseio(){ if(passeio){ clearInterval(passeio); passeio = null; } }
   if(planta){
-    var marcas = [].slice.call(planta.querySelectorAll('.marca-zona'));
-    var itens  = [].slice.call(planta.querySelectorAll('.item-zona'));
-    var passeio = null, tocado = false;
-
-    function mostrar(z){
-      planta.dataset.zona = z;
-      planta.classList.add('guiando');
-      marcas.forEach(function(m){
-        var on = m.dataset.z === String(z);
-        m.classList.toggle('ativa', on);
-        if(on){
-          var cs = getComputedStyle(m);
-          /* o holofote mira o centro da área; o número fica ao lado do rótulo impresso */
-          planta.style.setProperty('--fx', (cs.getPropertyValue('--ax') || cs.getPropertyValue('--x')).trim());
-          planta.style.setProperty('--fy', (cs.getPropertyValue('--ay') || cs.getPropertyValue('--y')).trim());
-        }
-      });
-      itens.forEach(function(i){
-        var on = i.dataset.z === String(z);
-        i.classList.toggle('ativa', on);
-        i.setAttribute('aria-current', on ? 'true' : 'false');
-      });
-    }
-    function parar(){ if(passeio){ clearInterval(passeio); passeio = null; } tocado = true; }
+    marcas = [].slice.call(planta.querySelectorAll('.marca-zona'));
+    itens  = [].slice.call(planta.querySelectorAll('.item-zona'));
+    var tocar = function(el){ pararPasseio(); tocado = true; mostrar(el.dataset.z); };
 
     marcas.concat(itens).forEach(function(el){
-      el.addEventListener('mouseenter', function(){ parar(); mostrar(el.dataset.z); });
-      el.addEventListener('focus',      function(){ parar(); mostrar(el.dataset.z); });
-      el.addEventListener('click',      function(){ parar(); mostrar(el.dataset.z); });
+      el.addEventListener('mouseenter', function(){ tocar(el); });
+      el.addEventListener('focus',      function(){ tocar(el); });
+      el.addEventListener('click',      function(){ tocar(el); });
     });
 
-    /* enquanto ninguém interage, o stand se apresenta sozinho */
     if(temIO && !reduzido){
       new IntersectionObserver(function(es){
+        if(deck) return;
         es.forEach(function(e){
-          if(e.isIntersecting && !tocado && !passeio){
-            mostrar(1);
-            var z = 1;
-            passeio = setInterval(function(){
-              z = z % marcas.length + 1; mostrar(z);
-            }, 3200);
-          } else if(!e.isIntersecting && passeio){
-            clearInterval(passeio); passeio = null;
-          }
+          if(e.isIntersecting) iniciarPasseio();
+          else pararPasseio();
         });
       }, {threshold:.35}).observe(planta);
     } else {
@@ -1437,20 +1659,90 @@ strong{color:var(--branco);font-weight:500}
     }
   }
 
+  /* ── deck: teclado, roda, toque, trilho e setas ──────────────────── */
   addEventListener('keydown', function(e){
     if(e.metaKey || e.ctrlKey || e.altKey) return;
     var k = e.key;
-    if(lupa && lupa.classList.contains('aberta')){
+    if(lupaAberta()){
       if(k === 'Escape'){ e.preventDefault(); fechar(); }
       else if(k === 'ArrowRight'){ e.preventDefault(); abrir(atualLupa + 1); }
       else if(k === 'ArrowLeft'){ e.preventDefault(); abrir(atualLupa - 1); }
       return;
     }
-    if(k==='ArrowDown'||k==='ArrowRight'||k==='PageDown'||k===' '){ e.preventDefault(); irPara(1); }
-    else if(k==='ArrowUp'||k==='ArrowLeft'||k==='PageUp'){ e.preventDefault(); irPara(-1); }
+    /* espaço num botão ou link é clique, não troca de slide */
+    if(k === ' ' && e.target.closest && e.target.closest('button, a, [role="button"]')) return;
+    var frente = k==='ArrowDown'||k==='ArrowRight'||k==='PageDown'||k===' ';
+    var tras   = k==='ArrowUp'||k==='ArrowLeft'||k==='PageUp';
+    if(deck){
+      if(frente){ e.preventDefault(); ir(atual + 1); }
+      else if(tras){ e.preventDefault(); ir(atual - 1); }
+      else if(k==='Home'){ e.preventDefault(); ir(0); }
+      else if(k==='End'){ e.preventDefault(); ir(N-1); }
+      return;
+    }
+    if(frente){ e.preventDefault(); irPara(1); }
+    else if(tras){ e.preventDefault(); irPara(-1); }
     else if(k==='Home'){ e.preventDefault(); scrollTo({top:0, behavior:'smooth'}); }
     else if(k==='End'){ e.preventDefault(); secoes[secoes.length-1].scrollIntoView({behavior:'smooth'}); }
   });
+
+  /* Um slide por gesto: o primeiro evento de cada gesto troca o slide e o
+     resto (inclusive a inércia do trackpad) é ignorado. Rodando sem parar,
+     a roda avança de novo a cada 1,1 s. */
+  var rodaUltima = 0, rodaTrocou = 0;
+  addEventListener('wheel', function(e){
+    if(!deck || lupaAberta()) return;
+    var d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    var t = performance.now(), novoGesto = t - rodaUltima > 250;
+    rodaUltima = t;
+    if(novoGesto ? Math.abs(d) >= 4 : (t - rodaTrocou > 1100 && Math.abs(d) >= 30)){
+      rodaTrocou = t;
+      ir(atual + (d > 0 ? 1 : -1));
+    }
+  }, {passive:true});
+
+  var toqueX = null, toqueY = 0;
+  addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1){ toqueX = null; return; }
+    toqueX = e.touches[0].clientX; toqueY = e.touches[0].clientY;
+  }, {passive:true});
+  addEventListener('touchend', function(e){
+    if(!deck || toqueX === null || lupaAberta()){ toqueX = null; return; }
+    var dx = e.changedTouches[0].clientX - toqueX, dy = e.changedTouches[0].clientY - toqueY;
+    toqueX = null;
+    var d = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+    if(Math.abs(d) > 60) ir(atual + (d < 0 ? 1 : -1));
+  }, {passive:true});
+
+  /* links internos (o trilho) trocam de slide em vez de rolar */
+  document.addEventListener('click', function(e){
+    if(!deck) return;
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if(!a) return;
+    var el = document.getElementById(decodeURIComponent(a.getAttribute('href').slice(1)));
+    var s = el && el.closest('.slide');
+    if(!s) return;
+    e.preventDefault();
+    ir(secoes.indexOf(s));
+  });
+  if(btAnt)  btAnt.addEventListener('click',  function(){ ir(atual - 1); });
+  if(btProx) btProx.addEventListener('click', function(){ ir(atual + 1); });
+
+  /* ── início ──────────────────────────────────────────────────────── */
+  if(deck){
+    ajustar();
+    ir(indiceDoHash(), true);
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(ajustar);
+    addEventListener('load', ajustar);
+  } else {
+    if(/^#\d+$/.test(location.hash)){
+      var s0 = secoes[indiceDoHash()];
+      if(s0) scrollTo({top: s0.offsetTop, behavior: 'instant'});
+    }
+    atualizar();
+    conferirPendentes();
+    addEventListener('load', conferirPendentes);
+  }
 })();
 </script>
 </body>
